@@ -1,12 +1,13 @@
 body {
   position: relative;
-  height: 98%;
+  height: 100%;
   color: LightSlateGray;
   font-family: sans-serif;
   background-size: 48px 48px;
   background-image: linear-gradient(90deg, teal 1px, transparent 0px),
     linear-gradient(teal 1px, transparent 0px);
   background-color: rgb(42, 42, 42);
+  margin: 0px;
 }
 
 .dragndrop {
@@ -15,6 +16,7 @@ body {
   flex-flow: nowrap row;
   position: absolute;
   bottom: 0px;
+  justify-content: space-evenly;
 }
 
 .dragndrop__btn {
@@ -56,7 +58,7 @@ i {
 #droppable {
   color: #eee;
   border: 5px #eee dashed;
-  flex: 1;
+  flex: 0.9;
   border-radius: 10px;
 }
 
@@ -166,31 +168,19 @@ section.zoomedIn img.p2 {
 #help-tooltip {
   background-color: rgb(42, 42, 42);
   color: #def;
-  padding: 10px;
-  border-radius: 4px;
+  padding: 16px;
+  border-radius: 6px;
   position: absolute;
   z-index: 9;
   width: calc(100% - 128px);
+  max-width: 680px;
   margin: auto;
   box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.3);
   display: flex;
   flex-flow: column nowrap;
-  opacity: 0;
   left: 50%;
   top: 50%;
-  transform: translate(-50%, -150vh);
-}
-
-section#help-tooltip.visible {
-  opacity: 1;
-  transform: translate(-50%,-50%);
-  transition: transform 500ms cubic-bezier(0,.64,.41,.99), opacity 300ms 280ms ease-in-out;
-}
-
-section#help-tooltip:not(.visible) {
-  opacity: 0;
-  transition: transform 500ms 100ms cubic-bezier(.64,0,.99,.41), opacity 280ms ease-in-out;
-  transform: translate(-50%,-150vh);
+  transform: translate(-50%, calc(-50% - 20px));
 }
 
 .help-header {
@@ -208,6 +198,35 @@ section#help-tooltip:not(.visible) {
   color: rgba(232, 232, 255, 1);
 }
 
+div#help-wrapper {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.3);
+  z-index: 3;
+  transform: translateY(-100vh);
+  opacity: 0;
+  transition: opacity 300ms ease-in-out;
+}
+
+div#help-wrapper.visible {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+div#help-wrapper.visible section {
+  transform: translate(-50%, -50%);
+  transition: transform 300ms 50ms ease-in-out;
+}
+
+div#help-wrapper:not(.visible) {
+  transition: opacity 350ms ease-in-out, transform 0ms 350ms;
+}
+
+div#help-wrapper:not(.visible) section {
+  transition: transform 300ms 50ms ease-in-out;
+}
+
 .caption {
   display: flex;
   flex-flow: nowrap row;
@@ -216,4 +235,8 @@ section#help-tooltip:not(.visible) {
 
 #content {
   height: 0px;
+}
+
+#canvas-zone.blur {
+  pointer-events: none;
 }
