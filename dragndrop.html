@@ -7,45 +7,21 @@
     <script src="https://kit.fontawesome.com/8a320ab812.js" crossorigin="anonymous"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.4/jquery-ui.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+
   </head>
 
   <body>
-      <section id="canvas-zone">
-        <div id='zoomin' class="dragndrop__btn dragndrop__elt"><i class="fas fa-search"></i></div>
-        <div id='content'></div>
-        <div class="dragndrop">
-            <div id='droppable' class="dragndrop__elt"><i class="fas fa-trash"></i></div>
-            <div id='clear-all' class="dragndrop__btn dragndrop__elt"><i class="fas fa-times-circle"></i></div>
-        </div>
-      </section>
+    <section id="canvas-zone">
+      <div id='zoomin' class="dragndrop__btn dragndrop__elt"><i class="fas fa-search"></i></div>
+      <div id='content'></div>
+      <div class="dragndrop">
+        <div id='droppable' class="dropzone dragndrop__elt"><i class="fas fa-trash"></i></div>
+        <div id='clear-all' class="dragndrop__btn dragndrop__elt"><i class="fas fa-times-circle"></i></div>
+      </div>
+    </section>
     
     <script type="text/javascript">
-
-      function getZIndex(j) {
-	  var z = $(j).css("z-index");
-	  z = parseInt(z,10); 
-	  if (isNaN(z)) return 1;
-	  return z;
-      }    
-      
-      function maxZ() {
-          var mj = 0;
-          $('img').each(function(){
-              var z = getZIndex(this);
-              if (z > mj) {
-                  mj = z;
-              }
-          });
-          return mj;
-      } 
-
-      function updateZindex(){
-          var z = getZIndex(this);
-          var mz = maxZ();
-          if (z < mz || mz == 1) {
-              $(this).css("z-index",mz+1);
-          }
-      }
 
       $.generateId = function() {
           return arguments.callee.prefix + arguments.callee.count++;
@@ -60,23 +36,16 @@
           });
       };
 
-
       function insertImageP1(src) {
           var id = $.generateId();
           var opacity = 1;
-          $('#content').append('<img id="'+ id + '" src="' + src + '"/>');
-          setTimeout(function() {
-              $('#'+id).css("z-index",1).draggable().fadeTo('fast', opacity).mousedown(updateZindex);
-          },100);
+          $('#content').append('<img id="'+ id + '" class="draggable"' + 'src="' + src + '"/>');
       }
 
       function insertImageP2(src) {
           var id = $.generateId();
           var opacity = 1;
-          $('#content').append('<img class="p2" id="'+ id + '" src="' + src + '"/>');
-          setTimeout(function() {
-              $('#'+id).css("z-index",1).draggable().fadeTo('fast', opacity).mousedown(updateZindex);
-          },100);
+          $('#content').append('<img id="'+ id + '" class="draggable p2"' + 'src="' + src + '" />');
       }
 
       $(function() {
@@ -84,14 +53,72 @@
 	  $("#clear-all").button().click(function() {
               $('img').remove();
 	  });
-	  $("#droppable").droppable({
-              drop: function(evt,ui) { 
-		  ui.draggable.remove();
-              }
-	  });
       });
-      </script>
-      <script src="imageEdit.js"></script>
+
+      const position = { x: 0, y: 0 }
+      const pos_map = new Map()
+      var tar_id = ""
+      interact('.draggable').draggable({
+	  listeners: {
+	      start (event) {
+		  tar_id=event.target.id
+		  if ( ! pos_map.has(tar_id) ) {
+		      pos_map.set(tar_id, {x:0, y:0})    
+		  }
+		  
+		  console.log(event.type, event.target, position, event.target.id)
+		  
+	      },
+	      move (event) {
+		  
+		  position.x= pos_map.get(tar_id).x + event.dx
+		  position.y= pos_map.get(tar_id).y + event.dy
+		  pos_map.set(tar_id, {x:position.x, y:position.y})		 
+		  
+		  event.target.style.left =
+		      `${position.x}px`
+		  event.target.style.top  =
+		      `${position.y}px`
+		  
+	      },
+	  }
+      })
+
+      // enable draggables to be dropped into this
+      interact('.dropzone').dropzone({
+	  // Require a 75% element overlap for a drop to be possible
+	  overlap: 0.30,
+
+	  // listen for drop related events:
+
+	  ondropactivate: function (event) {
+	      // add active dropzone feedback
+	      event.target.classList.add('drop-active')
+	  },
+	  ondragenter: function (event) {
+	      var draggableElement = event.relatedTarget
+	      var dropzoneElement = event.target
+
+	      // feedback the possibility of a drop
+	      dropzoneElement.classList.add('drop-target')
+	      draggableElement.classList.add('can-drop')
+	  },
+	  ondragleave: function (event) {
+	      // remove the drop feedback style
+	      event.target.classList.remove('drop-target')
+	      event.relatedTarget.classList.remove('can-drop')
+	  },
+	  ondrop: function (event) {
+	      event.relatedTarget.remove()
+	  },
+	  ondropdeactivate: function (event) {
+	      // remove active dropzone feedback
+	      event.target.classList.remove('drop-active')
+	      event.target.classList.remove('drop-target')
+	  }
+      })      
+    </script>
+    <script src="imageEdit.js"></script>
   </body>
 
 
